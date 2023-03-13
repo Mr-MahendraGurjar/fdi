@@ -1,155 +1,93 @@
-import 'package:fdis/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
-import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
-class BottomNavBar extends StatefulWidget {
-  final BuildContext menuScreenContext;
-  const BottomNavBar({super.key, required this.menuScreenContext});
+class PersistentBottomBarScaffold extends StatefulWidget {
+  /// pass the required items for the tabs and BottomNavigationBar
+  final List<PersistentTabItem> items;
+
+  const PersistentBottomBarScaffold({Key? key, required this.items})
+      : super(key: key);
 
   @override
-  State<BottomNavBar> createState() => _BottomNavBarState();
+  _PersistentBottomBarScaffoldState createState() =>
+      _PersistentBottomBarScaffoldState();
 }
 
-class _BottomNavBarState extends State<BottomNavBar> {
-  late PersistentTabController _controller;
-  late bool _hideNavBar;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = PersistentTabController();
-    _hideNavBar = false;
-  }
-
+class _PersistentBottomBarScaffoldState
+    extends State<PersistentBottomBarScaffold> {
+  int _selectedTab = 0;
 
   @override
   Widget build(BuildContext context) {
-    return PersistentTabView(
-      context,
-      controller: _controller,
-      items: _navBarsItems(),
-      confineInSafeArea: true,
-      backgroundColor: Colors.white,
-      handleAndroidBackButtonPress: true,
-      resizeToAvoidBottomInset: true,
-      stateManagement: true,
-      hideNavigationBarWhenKeyboardShows: true,
-      decoration: NavBarDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        colorBehindNavBar: Colors.grey,
-      ),
-      popAllScreensOnTapOfSelectedTab: true,
-      itemAnimationProperties: const ItemAnimationProperties(),
-      screenTransitionAnimation: const ScreenTransitionAnimation(),
-      navBarStyle: NavBarStyle.style6,
-      onItemSelected: (index) {
-        switch (index) {
-          case 0:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Item1(),
-              ),
-            );
-            break;
-          case 1:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AnotherClass(),
-              ),
-            );
-            break;
-        // Add cases for other items
+    return WillPopScope(
+      onWillPop: () async {
+        /// Check if curent tab can be popped
+        if (widget.items[_selectedTab].navigatorkey?.currentState?.canPop() ??
+            false) {
+          widget.items[_selectedTab].navigatorkey?.currentState?.pop();
+          return false;
+        } else {
+          // if current tab can't be popped then use the root navigator
+          return true;
         }
-      }, screens: _buildScreens(),
+      },
+      child: Scaffold(
+        /// Using indexedStack to maintain the order of the tabs and the state of the
+        /// previously opened tab
+        body: IndexedStack(
+          index: _selectedTab,
+          children: widget.items
+              .map((page) => Navigator(
+            /// Each tab is wrapped in a Navigator so that naigation in
+            /// one tab can be independent of the other tabs
+            key: page.navigatorkey,
+            onGenerateInitialRoutes: (navigator, initialRoute) {
+              return [
+                MaterialPageRoute(builder: (context) => page.tab)
+              ];
+            },
+          ))
+              .toList(),
+        ),
+
+        /// Define the persistent bottom bar
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedTab,
+          onTap: (index) {
+            /// Check if the tab that the user is pressing is currently selected
+            if (index == _selectedTab) {
+              /// if you want to pop the current tab to its root then use
+              widget.items[index].navigatorkey?.currentState
+                  ?.popUntil((route) => route.isFirst);
+
+              /// if you want to pop the current tab to its last page
+              /// then use
+              // widget.items[index].navigatorkey?.currentState?.pop();
+            } else {
+              setState(() {
+                _selectedTab = index;
+              });
+            }
+          },
+          items: widget.items
+              .map((item) => BottomNavigationBarItem(
+              icon: Icon(item.icon), label: item.title))
+              .toList(),
+        ),
+      ),
     );
   }
+}
 
-  List<Widget> _buildScreens() => [
-    DashboardPage(
-      menuScreenContext: widget.menuScreenContext,
-      hideStatus: _hideNavBar,
-      onScreenHideButtonPressed: () {
-        setState(() {
-          _hideNavBar = !_hideNavBar;
-        });
-      },
-    ),
-    MainScreen(
-      menuScreenContext: widget.menuScreenContext,
-      hideStatus: _hideNavBar,
-      onScreenHideButtonPressed: () {
-        setState(() {
-          _hideNavBar = !_hideNavBar;
-        });
-      },
-    ),
-    MainScreen(
-      menuScreenContext: widget.menuScreenContext,
-      hideStatus: _hideNavBar,
-      onScreenHideButtonPressed: () {
-        setState(() {
-          _hideNavBar = !_hideNavBar;
-        });
-      },
-    ),
-    MainScreen(
-      menuScreenContext: widget.menuScreenContext,
-      hideStatus: _hideNavBar,
-      onScreenHideButtonPressed: () {
-        setState(() {
-          _hideNavBar = !_hideNavBar;
-        });
-      },
-    ),
-    MainScreen(
-      menuScreenContext: widget.menuScreenContext,
-      hideStatus: _hideNavBar,
-      onScreenHideButtonPressed: () {
-        setState(() {
-          _hideNavBar = !_hideNavBar;
-        });
-      },
-    ),
-  ];
+/// Model class that holds the tab info for the [PersistentBottomBarScaffold]
+class PersistentTabItem {
+  final Widget tab;
+  final GlobalKey<NavigatorState>? navigatorkey;
+  final String title;
+  final IconData icon;
 
-  List<PersistentBottomNavBarItem> _navBarsItems() {
-    return [
-      PersistentBottomNavBarItem(
-        icon: const Icon(Icons.home),
-        title: "Item 1",
-          activeColorPrimary: Colors.blue,
-          inactiveColorPrimary: Colors.grey,
-          inactiveColorSecondary: Colors.purple
-      ),
-      PersistentBottomNavBarItem(
-        icon: const Icon(Icons.search),
-        title: "Search",
-        activeColorPrimary: Colors.teal,
-        inactiveColorPrimary: Colors.grey,
-        routeAndNavigatorSettings: RouteAndNavigatorSettings(
-          initialRoute: "/",
-          routes: {
-            "/first": (final context) => const MainScreen2(),
-            "/second": (final context) => const MainScreen3(),
-          },
-        ),
-      ),
-      PersistentBottomNavBarItem(
-        icon: const Icon(Icons.add),
-        title: "Add",
-        activeColorPrimary: Colors.blueAccent,
-        inactiveColorPrimary: Colors.grey,
-        routeAndNavigatorSettings: RouteAndNavigatorSettings(
-          initialRoute: "/",
-          routes: {
-            "/first": (final context) => const MainScreen2(),
-            "/second": (final context) => const MainScreen3(),
-          },
-        ),
-      ),
-      // Add items for other classes
-    ];
-  }
+  PersistentTabItem(
+      {required this.tab,
+        this.navigatorkey,
+        required this.title,
+        required this.icon});
 }

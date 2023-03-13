@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:fdis/models/login_model.dart';
-import 'package:fdis/utils/api.dart';
-import 'package:fdis/utils/shared_prefs.dart';
+import 'package:FdisTesting/models/login_model.dart';
+import 'package:FdisTesting/utils/api.dart';
+import 'package:FdisTesting/utils/shared_prefs.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -51,15 +51,15 @@ class LoginProvider with ChangeNotifier {
     setLoading(true);
     try {
       final response = await api.post(
-        endpoint: 'api/v1/dashboard/Mob',
-        body: {'username': username, 'password': password},
+        endpoint: 'api/v1/dashboard/Mob/login',
+        body: {'username': username.trim(), 'password': password.trim()},
       );
-      final item = json.decode(response.data);
+      final item = response.data;
       if (response.statusCode == 200) {
         loginModel = LoginModel.fromJson(item);
         SharedPrefs.saveToken(loginModel.data?.token ?? "");
         SharedPrefs.saveUserId(loginModel.data?.userId ?? "");
-        SharedPrefs.saveUserName(loginModel.data?.username ?? "");
+        SharedPrefs.saveIsLoggedIn(true);
         _loginState = LoginState.success;
         setLoading(false);
         notifyListeners();
@@ -85,6 +85,7 @@ class LoginProvider with ChangeNotifier {
       loginErrorMessage = error.toString();
       setLoading(false);
       _loginState = LoginState.error;
+      debugPrint(error.toString());
       notifyListeners();
       if (onLoginStateChanged != null) {
         onLoginStateChanged(LoginState.error);

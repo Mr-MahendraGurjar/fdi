@@ -1,4 +1,4 @@
-name: fdis
+name: FdisTesting
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -44,6 +44,12 @@ dependencies:
   pretty_dio_logger: ^1.1.1
   dio: ^4.0.6
   persistent_bottom_nav_bar: ^5.0.2
+  webview_flutter: ^4.0.2
+  sqflite: ^2.2.4+1
+  image_picker: ^0.8.6+2
+  permission_handler: ^10.2.0
+  signature: ^5.3.0
+  path: ^1.8.2
 
 dev_dependencies:
   flutter_test:

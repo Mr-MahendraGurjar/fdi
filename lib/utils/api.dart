@@ -1,12 +1,10 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
-import 'package:http/http.dart' as http;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class Api {
   final Dio dio = Dio();
   static const String BASE_URL = 'http://3.121.115.115:4002/';
+
 
  Api(){
    dio.options.baseUrl = BASE_URL;
@@ -37,9 +35,10 @@ class Api {
     }
   }
 
-   Future<Response> get(String endpoint) async {
+   Future<Response> get(String endpoint, {Map<String, dynamic>? header}) async {
     try {
-      final response = await dio.get(endpoint);
+      Options options = Options(headers: header);
+      final response = await dio.get(endpoint,options: options);
 
       if (response.statusCode! >= 200 && response.statusCode! < 300) {
         return response;

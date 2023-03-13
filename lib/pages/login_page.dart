@@ -1,5 +1,6 @@
-import 'package:fdis/providers/login_provider.dart';
-import 'package:fdis/widgets/flutter_flow_theme.dart';
+import 'package:FdisTesting/pages/home_page.dart';
+import 'package:FdisTesting/providers/login_provider.dart';
+import 'package:FdisTesting/widgets/flutter_flow_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -145,8 +146,8 @@ class LoginPage extends StatelessWidget {
                                   ),
                                   TextFormField(
                                     controller: _usernameController,
-                                    autofocus: true,
                                     obscureText: false,
+                                    textInputAction: TextInputAction.next,
                                     validator: (value) {
                                       if (value!.isEmpty) {
                                         return "Please Enter UserName";
@@ -160,12 +161,12 @@ class LoginPage extends StatelessWidget {
                                       hintText: 'Enter username',
                                       hintStyle: const TextStyle(fontSize: 12),
                                       enabledBorder: UnderlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: Color(0x00000000),
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(10)
-                                      ),
+                                          borderSide: const BorderSide(
+                                            color: Color(0x00000000),
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
                                       focusedBorder: const UnderlineInputBorder(
                                         borderSide: BorderSide(
                                           color: Color(0x00000000),
@@ -214,7 +215,8 @@ class LoginPage extends StatelessWidget {
                                   ),
                                   TextFormField(
                                     controller: _passwordController,
-                                    autofocus: true,
+                                    textInputAction: TextInputAction.done,
+                                    onFieldSubmitted: (_) => FocusScope.of(context).unfocus(),
                                     obscureText: false,
                                     validator: (value) {
                                       if (value!.isEmpty) {
@@ -273,8 +275,7 @@ class LoginPage extends StatelessWidget {
                                           fontFamily: 'Poppins',
                                           color: const Color(0xFF4F5254),
                                         ),
-                                    keyboardType:
-                                        TextInputType.visiblePassword,
+                                    keyboardType: TextInputType.visiblePassword,
                                   ),
                                 ],
                               ),
@@ -304,12 +305,16 @@ class LoginPage extends StatelessWidget {
                               },
                             );
                             if (success) {
-                              showTopSnackBar(
-                                Overlay.of(context)!,
-                                const CustomSnackBar.success(
-                                  message: 'Login Successfully',
-                                ),
-                              );
+                              // showTopSnackBar(
+                              //   Overlay.of(context)!,
+                              //   const CustomSnackBar.success(
+                              //     message: 'Login Successfully',
+                              //   ),
+                              // );
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => HomePage()));
                             }
                           }
                         },
